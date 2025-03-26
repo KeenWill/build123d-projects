@@ -32,7 +32,7 @@
       libz
       git
       aws-crt-cpp
-      libxrender
+      xorg.libxrender
     ];
     venv.enable = true;
     venv.requirements = ''
