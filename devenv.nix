@@ -1,10 +1,13 @@
 { pkgs, config, ... }: {
 
-  packages = [
-    pkgs.cmake
-    pkgs.gcc
-    pkgs.opencascade-occt
-    pkgs.zlib
+  packages = with pkgs; [
+    cmake
+    clang
+    gcc
+    opencascade-occt
+    zlib
+    git
+    aws-crt-cpp
   ];
 
   cachix.enable = false;
@@ -14,6 +17,7 @@
     version = "3.12";
     libraries = with pkgs; [
       cmake
+      clang
       gcc
       opencascade-occt
       zlib
@@ -26,6 +30,8 @@
       coreutils
       expat
       libz
+      git
+      aws-crt-cpp
     ];
     venv.enable = true;
     venv.requirements = ''
@@ -39,6 +45,7 @@
       pylance
       numpy
       ninja
+      modal
       git+https://github.com/Ruudjhuu/gridfinity_build123d
     '';
     uv.enable = true;
