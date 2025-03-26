@@ -186,17 +186,22 @@ grid_x = bin_width_units(num_wrenches=len(wrenches))
 grid_y = 8
 
 with BuildPart() as part:
+    print("prebin")
     Bin(
         BaseEqual(grid_x=grid_x, grid_y=grid_y, features=[MagnetHole(BottomCorners())]),
         height_in_units=9,
         # lip=StackingLip(),
         # compartments=CompartmentsEqual(compartment_list=[Compartment()]),
     )
+    print("postbin")
 
     top_face = (
-        part.faces().filter_by(GeomType.PLANE).filter_by_position(Axis.Z, 10, 1000)
+        # part.faces().filter_by(GeomType.PLANE).filter_by_position(Axis.Z, 10,
+        # 1000)
+        part.faces().sort_by(Axis.Z)[-1]
     )
 
+    print("prewrenches")
     with Locations(top_face):
         for idx, wrench in enumerate(wrenches):
             with Locations(
