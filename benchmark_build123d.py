@@ -194,9 +194,7 @@ def create():
             # compartments=CompartmentsEqual(compartment_list=[Compartment()]),
         )
 
-        top_face = (
-            part.faces().filter_by(GeomType.PLANE).filter_by_position(Axis.Z, 10, 1000)
-        )
+        top_face = part.faces().sort_by(Axis.Z)[-1]
 
         with Locations(top_face):
             for idx, wrench in enumerate(wrenches):
