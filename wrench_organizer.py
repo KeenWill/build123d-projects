@@ -18,8 +18,8 @@ dockerfile_image = modal.Image.from_dockerfile("Dockerfile")
 global_wrench_width = 20
 wrench_above_top_ratio = 0.25
 
-wrench_width_padding = 5
-wrench_height_padding = 15
+wrench_x_min_padding = 5
+wrench_y_min_padding = 15
 
 
 @dataclass
@@ -30,25 +30,50 @@ class WrenchSpec:
     head_width: float
     body_width: float
 
-    def width_start_pos(self, idx: int, bin_width_mm: int):
-        return (
-            (-bin_width_mm / 2)
-            + (global_wrench_width * idx)
-            + ((idx + 1) * wrench_width_padding)
-        )
-
-    def height_start_pos(self, bin_height_mm: int):
-        return (-bin_height_mm / 2) + wrench_height_padding + (self.total_length / 2.0)
+    def total_slot_length(self) -> float:
+        return self.total_length + 10
 
 
 def bin_width_units(num_wrenches: int):
     minimum_width = (global_wrench_width * num_wrenches) + (
-        (num_wrenches + 1) * wrench_width_padding
+        (num_wrenches + 1) * wrench_x_min_padding
     )
     return math.ceil(minimum_width / 42.0)
 
 
-# def bin_height_units
+@dataclass
+class WrenchPlacement:
+    wrenches: list[WrenchSpec]
+    bin_width_units: int
+    bin_height_units: int
+
+    def num_wrenches(self) -> int:
+        return len(self.wrenches)
+
+    def bin_width_mm(self) -> int:
+        return self.bin_width_units * 42
+
+    def bin_height_mm(self) -> int:
+        return self.bin_height_units * 42
+
+    def wrench_x_padding(self) -> float:
+        return (self.bin_width_mm() - global_wrench_width * self.num_wrenches()) / (
+            (self.num_wrenches()) + 1
+        )
+
+    def x_start_pos(self, idx: int) -> float:
+        return (
+            (-self.bin_width_mm() / 2)
+            + (global_wrench_width * idx)
+            + ((idx + 1) * self.wrench_x_padding())
+        )
+
+    def y_start_pos(self, idx: int) -> float:
+        return (
+            (-self.bin_height_mm() / 2)
+            + wrench_y_min_padding
+            + (self.wrenches[idx].total_slot_length() / 2.0)
+        )
 
 
 class Wrench(BasePartObject):
@@ -61,7 +86,7 @@ class Wrench(BasePartObject):
             with BuildSketch() as full_wrench_sketch:
                 Rectangle(
                     width=global_wrench_width,
-                    height=spec.total_length,
+                    height=spec.total_slot_length(),
                     align=(Align.MIN, Align.CENTER),
                 )
             head_extrude_amount = (1 - wrench_above_top_ratio) * spec.head_width
@@ -168,46 +193,46 @@ wrenches: list[list[WrenchSpec]] = [
         ####### METRIC
         ###################################
         WrenchSpec(
-            "6mm", total_length=132, body_length=95, head_width=15, body_width=3.5
+            "6MM", total_length=132, body_length=95, head_width=15, body_width=3.5
         ),
         WrenchSpec(
-            "7mm", total_length=136, body_length=100, head_width=17, body_width=4
+            "7MM", total_length=136, body_length=100, head_width=17, body_width=4
         ),
         WrenchSpec(
-            "8mm", total_length=150, body_length=110, head_width=18.5, body_width=4
+            "8MM", total_length=150, body_length=110, head_width=18.5, body_width=4
         ),
         WrenchSpec(
-            "9mm", total_length=160, body_length=120, head_width=19, body_width=4
+            "9MM", total_length=160, body_length=120, head_width=19, body_width=4
         ),
         WrenchSpec(
-            "10mm", total_length=175, body_length=125, head_width=22, body_width=4.5
+            "10MM", total_length=175, body_length=125, head_width=22, body_width=4.5
         ),
         WrenchSpec(
-            "11mm", total_length=188, body_length=132, head_width=25, body_width=5
+            "11MM", total_length=188, body_length=132, head_width=25, body_width=5
         ),
         WrenchSpec(
-            "12mm", total_length=198, body_length=140, head_width=27, body_width=5
+            "12MM", total_length=198, body_length=140, head_width=27, body_width=5
         ),
         WrenchSpec(
-            "13mm", total_length=210, body_length=150, head_width=28, body_width=5
+            "13MM", total_length=210, body_length=150, head_width=28, body_width=5
         ),
         WrenchSpec(
-            "14mm", total_length=225, body_length=160, head_width=31, body_width=5.5
+            "14MM", total_length=225, body_length=160, head_width=31, body_width=5.5
         ),
         WrenchSpec(
-            "15mm", total_length=235, body_length=165, head_width=33, body_width=5.5
+            "15MM", total_length=235, body_length=165, head_width=33, body_width=5.5
         ),
         WrenchSpec(
-            "16mm", total_length=245, body_length=170, head_width=35, body_width=5.5
+            "16MM", total_length=245, body_length=170, head_width=35, body_width=5.5
         ),
         WrenchSpec(
-            "17mm", total_length=265, body_length=XXXX, head_width=35, body_width=6
+            "17MM", total_length=265, body_length=175, head_width=35, body_width=6
         ),
         WrenchSpec(
-            "18mm", total_length=273, body_length=190, head_width=40, body_width=6.5
+            "18MM", total_length=273, body_length=190, head_width=40, body_width=6.5
         ),
         WrenchSpec(
-            "19mm", total_length=281, body_length=195, head_width=42, body_width=6.5
+            "19MM", total_length=281, body_length=195, head_width=42, body_width=6.5
         ),
     ],
 ]
@@ -220,7 +245,11 @@ grid_y = 8
 # %%
 
 bin = Bin(
-    BaseEqual(grid_x=grid_x, grid_y=grid_y, features=[MagnetHole(BottomCorners())]),
+    BaseEqual(
+        grid_x=grid_x,
+        grid_y=grid_y,
+        #   features=[MagnetHole(BottomCorners())]
+    ),
     height_in_units=9,
     # lip=StackingLip(),
     # compartments=CompartmentsEqual(compartment_list=[Compartment()]),
@@ -239,7 +268,7 @@ class Wrench(BasePartObject):
             with BuildSketch() as full_wrench_sketch:
                 Rectangle(
                     width=global_wrench_width,
-                    height=spec.total_length,
+                    height=spec.total_slot_length(),
                     align=(Align.MIN, Align.CENTER),
                 )
             head_extrude_amount = (1 - wrench_above_top_ratio) * spec.head_width
@@ -304,13 +333,14 @@ with BuildPart() as part:
     )
     with Locations(top_face):
         for group_idx, wrench_group in enumerate(wrenches):
+            wrench_placement = WrenchPlacement(
+                wrenches=wrench_group, bin_width_units=grid_x, bin_height_units=grid_y
+            )
             for wrench_idx, wrench in enumerate(wrench_group):
                 with Locations(
                     (
-                        wrench.width_start_pos(
-                            idx=wrench_idx, bin_width_mm=grid_x * 42
-                        ),
-                        wrench.height_start_pos(bin_height_mm=grid_y * 42),
+                        wrench_placement.x_start_pos(idx=wrench_idx),
+                        wrench_placement.y_start_pos(idx=wrench_idx),
                     )
                 ) as location:
                     print(f"processing wrench {wrench_idx+1}")
@@ -318,12 +348,16 @@ with BuildPart() as part:
                 with BuildSketch(
                     Location(
                         (
-                            wrench.width_start_pos(
-                                idx=wrench_idx, bin_width_mm=grid_x * 42
-                            )
+                            wrench_placement.x_start_pos(idx=wrench_idx)
                             + (global_wrench_width / 2),
-                            wrench.height_start_pos(bin_height_mm=grid_y * 42)
-                            - ((wrench.total_length + wrench_width_padding) / 2)
+                            wrench_placement.y_start_pos(idx=wrench_idx)
+                            - (
+                                (
+                                    wrench.total_slot_length()
+                                    + wrench_placement.wrench_x_padding()
+                                )
+                                / 2
+                            )
                             - 5,
                             top_face.center_location.position.Z,
                         )
@@ -336,9 +370,15 @@ with BuildPart() as part:
                         font_style=FontStyle.BOLD,
                     )
                     # .rotate(0, 0, 90)
-                extrude(to_extrude=label_sketch.sketch, amount=5, mode=Mode.ADD)
+                extrude(to_extrude=label_sketch.sketch, amount=3, mode=Mode.ADD)
 
-    # chamfer(objects=part.faces().filter_by(GeomType.PLANE).filter_by_position(Axis.Z, 10, 1000).edges(), length=1)
+    chamfer(
+        objects=part.faces()
+        .filter_by(GeomType.PLANE)
+        .filter_by_position(Axis.Z, 10, 1000)
+        .edges(),
+        length=1,
+    )
 
 show_all()
 # %%
