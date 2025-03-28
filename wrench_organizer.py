@@ -79,104 +79,76 @@ class WrenchPlacement:
 # TODO: DELETE
 XXXX = 260
 
-wrenches: list[list[WrenchSpec]] = [
-    # [
-    #     WrenchSpec(
-    #         '1/4"', total_length=132, body_length=95, head_width=15, body_width=3.5
-    #     ),
-    #     WrenchSpec(
-    #         '5/16"', total_length=150, body_length=105, head_width=19, body_width=4.0
-    #     ),
-    #     WrenchSpec(
-    #         '11/32"', total_length=162, body_length=115, head_width=19, body_width=4.0
-    #     ),
-    #     WrenchSpec(
-    #         '3/8"', total_length=170, body_length=125, head_width=21, body_width=4.0
-    #     ),
-    #     # WrenchSpec(
-    #     #     '7/16"', total_length=186, body_length=135, head_width=25, body_width=5
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '1/2"', total_length=208, body_length=150, head_width=28, body_width=5.5
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '9/16"', total_length=226, body_length=165, head_width=31, body_width=5.5
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '5/8"', total_length=244, body_length=175, head_width=36, body_width=6
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '11/16"', total_length=263, body_length=190, head_width=38, body_width=6
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '3/4"', total_length=280, body_length=195, head_width=42, body_width=7
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '13/16"', total_length=302, body_length=210, head_width=46, body_width=7
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '7/8"', total_length=XXXX, body_length=225, head_width=48, body_width=7.5
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '15/16"', total_length=XXXX, body_length=235, head_width=52, body_width=8
-    #     # ),
-    #     # WrenchSpec(
-    #     #     '1"', total_length=XXXX, body_length=250, head_width=55, body_width=9
-    #     # ),
-    # ],
-    [
-        ###################################
-        ####### METRIC
-        ###################################
-        WrenchSpec(
-            "6MM", total_length=132, body_length=95, head_width=15, body_width=3.5
-        ),
-        WrenchSpec(
-            "7MM", total_length=136, body_length=100, head_width=17, body_width=4
-        ),
-        WrenchSpec(
-            "8MM", total_length=150, body_length=110, head_width=18.5, body_width=4
-        ),
-        WrenchSpec(
-            "9MM", total_length=160, body_length=120, head_width=19, body_width=4
-        ),
-        WrenchSpec(
-            "10MM", total_length=175, body_length=125, head_width=22, body_width=4.5
-        ),
-        WrenchSpec(
-            "11MM", total_length=188, body_length=132, head_width=25, body_width=5
-        ),
-        WrenchSpec(
-            "12MM", total_length=198, body_length=140, head_width=27, body_width=5
-        ),
-        WrenchSpec(
-            "13MM", total_length=210, body_length=150, head_width=28, body_width=5
-        ),
-        WrenchSpec(
-            "14MM", total_length=225, body_length=160, head_width=31, body_width=5.5
-        ),
-        WrenchSpec(
-            "15MM", total_length=235, body_length=165, head_width=33, body_width=5.5
-        ),
-        WrenchSpec(
-            "16MM", total_length=245, body_length=170, head_width=35, body_width=5.5
-        ),
-        WrenchSpec(
-            "17MM", total_length=265, body_length=175, head_width=35, body_width=6
-        ),
-        WrenchSpec(
-            "18MM", total_length=273, body_length=190, head_width=40, body_width=6.5
-        ),
-        WrenchSpec(
-            "19MM", total_length=281, body_length=195, head_width=42, body_width=6.5
-        ),
-    ],
+imperial: list[WrenchSpec] = [
+    WrenchSpec('1/4"', total_length=132, body_length=95, head_width=15, body_width=3.5),
+    WrenchSpec(
+        '5/16"', total_length=150, body_length=105, head_width=19, body_width=4.0
+    ),
+    WrenchSpec(
+        '11/32"', total_length=162, body_length=115, head_width=19, body_width=4.0
+    ),
+    WrenchSpec(
+        '3/8"', total_length=170, body_length=125, head_width=21, body_width=4.0
+    ),
+    WrenchSpec('7/16"', total_length=186, body_length=135, head_width=25, body_width=5),
+    WrenchSpec(
+        '1/2"', total_length=208, body_length=150, head_width=28, body_width=5.5
+    ),
+    WrenchSpec(
+        '9/16"', total_length=226, body_length=165, head_width=31, body_width=5.5
+    ),
+    WrenchSpec('5/8"', total_length=244, body_length=175, head_width=36, body_width=6),
+    WrenchSpec(
+        '11/16"', total_length=263, body_length=190, head_width=38, body_width=6
+    ),
+    WrenchSpec('3/4"', total_length=280, body_length=195, head_width=42, body_width=7),
+    WrenchSpec(
+        '13/16"', total_length=302, body_length=210, head_width=46, body_width=7
+    ),
+    WrenchSpec(
+        '7/8"', total_length=XXXX, body_length=225, head_width=48, body_width=7.5
+    ),
+    WrenchSpec(
+        '15/16"', total_length=XXXX, body_length=235, head_width=52, body_width=8
+    ),
+    WrenchSpec('1"', total_length=XXXX, body_length=250, head_width=55, body_width=9),
+]
+metric: list[WrenchSpec] = [
+    ###################################
+    ####### METRIC
+    ###################################
+    WrenchSpec("6MM", total_length=132, body_length=95, head_width=15, body_width=3.5),
+    WrenchSpec("7MM", total_length=136, body_length=100, head_width=17, body_width=4),
+    WrenchSpec("8MM", total_length=150, body_length=110, head_width=18.5, body_width=4),
+    WrenchSpec("9MM", total_length=160, body_length=120, head_width=19, body_width=4),
+    WrenchSpec(
+        "10MM", total_length=175, body_length=125, head_width=22, body_width=4.5
+    ),
+    WrenchSpec("11MM", total_length=188, body_length=132, head_width=25, body_width=5),
+    WrenchSpec("12MM", total_length=198, body_length=140, head_width=27, body_width=5),
+    WrenchSpec("13MM", total_length=210, body_length=150, head_width=28, body_width=5),
+    WrenchSpec(
+        "14MM", total_length=225, body_length=160, head_width=31, body_width=5.5
+    ),
+    WrenchSpec(
+        "15MM", total_length=235, body_length=165, head_width=33, body_width=5.5
+    ),
+    WrenchSpec(
+        "16MM", total_length=245, body_length=170, head_width=35, body_width=5.5
+    ),
+    WrenchSpec("17MM", total_length=265, body_length=175, head_width=35, body_width=6),
+    WrenchSpec(
+        "18MM", total_length=273, body_length=190, head_width=40, body_width=6.5
+    ),
+    WrenchSpec(
+        "19MM", total_length=281, body_length=195, head_width=42, body_width=6.5
+    ),
 ]
 
 
-max_wrenches_width = max([len(wrenches) for wrenches in wrenches])
+max_wrenches_width = 14
 grid_x = bin_width_units(num_wrenches=max_wrenches_width)
-grid_y = 8
+grid_y = 13
 
 # %%
 
@@ -285,7 +257,7 @@ class WrenchGroup:
                     )
         return part
 
-    def labels(self):
+    def labels(self, flip: bool = False):
         with BuildPart() as part:
             with BuildSketch() as labels:
                 for wrench_idx, wrench in enumerate(self.wrenches):
@@ -301,10 +273,10 @@ class WrenchGroup:
                     ):
                         Text(
                             txt=wrench.label,
-                            font_size=10,
+                            font_size=14,
                             font_path="./fonts/D-DINCondensed-Bold.otf",
                             font_style=FontStyle.BOLD,
-                            rotation=90,
+                            rotation=270 if flip else 90,
                         )
             extrude(to_extrude=labels.sketch, amount=3, mode=Mode.ADD)
         return part
@@ -321,10 +293,14 @@ with BuildPart() as part:
         bin.faces().sort_by(Axis.Z)[-1]
     )
     with Locations(top_face):
-        for wrench_group in wrenches:
-            group = WrenchGroup(wrench_group)
-            add(group.wrench_slots(), mode=Mode.SUBTRACT)
-            add(group.labels(), mode=Mode.ADD)
+        metric_group = WrenchGroup(metric)
+        add(metric_group.wrench_slots(), mode=Mode.SUBTRACT)
+        add(metric_group.labels(), mode=Mode.ADD)
+
+        # with Locations((0, 150)):
+        imperial_group = WrenchGroup(imperial)
+        add(imperial_group.wrench_slots(), mode=Mode.SUBTRACT, rotation=(0, 0, 180))
+        add(imperial_group.labels(flip=True), mode=Mode.ADD, rotation=(0, 0, 180))
 
 show_all()
 # %%
