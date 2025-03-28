@@ -15,11 +15,12 @@ dockerfile_image = modal.Image.from_dockerfile("Dockerfile")
 # %%
 
 
-global_wrench_width = 20
-wrench_above_top_ratio = 0.25
+wrench_above_top_ratio = 0.33
 
-wrench_x_min_padding = 5
-wrench_y_min_padding = 15
+# wrench_x_min_padding = 0
+min_x_center_to_center_spacing = 20
+wrench_y_min_gap = 30
+wrench_x_margin = 15
 
 
 @dataclass
@@ -35,9 +36,7 @@ class WrenchSpec:
 
 
 def bin_width_units(num_wrenches: int):
-    minimum_width = (global_wrench_width * num_wrenches) + (
-        (num_wrenches + 1) * wrench_x_min_padding
-    )
+    minimum_width = min_x_center_to_center_spacing * num_wrenches + 2 * wrench_x_margin
     return math.ceil(minimum_width / 42.0)
 
 
@@ -56,89 +55,26 @@ class WrenchPlacement:
     def bin_height_mm(self) -> int:
         return self.bin_height_units * 42
 
-    def wrench_x_padding(self) -> float:
-        return (self.bin_width_mm() - global_wrench_width * self.num_wrenches()) / (
-            (self.num_wrenches()) + 1
-        )
+    def wrench_width(self) -> float:
+        return (self.bin_width_mm() - (2 * wrench_x_margin)) / self.num_wrenches()
+
+    def wrench_x_center_to_center_spacing(self) -> float:
+        return (
+            self.bin_width_mm() - (min_x_center_to_center_spacing * self.num_wrenches())
+        ) / (self.num_wrenches() + 1)
 
     def x_start_pos(self, idx: int) -> float:
         return (
-            (-self.bin_width_mm() / 2)
-            + (global_wrench_width * idx)
-            + ((idx + 1) * self.wrench_x_padding())
+            (-self.bin_width_mm() / 2) + wrench_x_margin + (self.wrench_width() * idx)
         )
 
     def y_start_pos(self, idx: int) -> float:
         return (
             (-self.bin_height_mm() / 2)
-            + wrench_y_min_padding
+            + wrench_y_min_gap
             + (self.wrenches[idx].total_slot_length() / 2.0)
         )
 
-
-class Wrench(BasePartObject):
-    def __init__(
-        self,
-        spec: WrenchSpec,
-        mode: Mode,
-    ):
-        with BuildPart() as wrench:
-            with BuildSketch() as full_wrench_sketch:
-                Rectangle(
-                    width=global_wrench_width,
-                    height=spec.total_slot_length(),
-                    align=(Align.MIN, Align.CENTER),
-                )
-            head_extrude_amount = (1 - wrench_above_top_ratio) * spec.head_width
-            extrude(
-                to_extrude=full_wrench_sketch.sketch, amount=-1 * head_extrude_amount
-            )
-
-            with BuildSketch() as body_sides_sketch:
-                Rectangle(
-                    width=global_wrench_width,
-                    height=spec.body_length,
-                    align=(Align.MIN, Align.CENTER),
-                )
-                with Locations(((global_wrench_width - spec.body_width) / 2, 0)):
-                    Rectangle(
-                        width=spec.body_width,
-                        height=spec.body_length,
-                        align=(Align.MIN, Align.CENTER),
-                        mode=Mode.SUBTRACT,
-                    )
-            extrude(
-                to_extrude=body_sides_sketch.sketch,
-                amount=-head_extrude_amount,
-                mode=Mode.SUBTRACT,
-            )
-
-            body_extrude_amount = head_extrude_amount / 2.0
-            # with Locations((0, 0, -body_extrude_amount)):
-            with Locations(
-                (
-                    (global_wrench_width - spec.body_width) / 2,
-                    0,
-                    -body_extrude_amount,
-                )
-            ):
-                with BuildSketch() as body_bottom_sketch:
-                    Rectangle(
-                        width=spec.body_width,
-                        height=spec.body_length,
-                        align=(Align.MIN, Align.CENTER),
-                    )
-                extrude(
-                    to_extrude=body_bottom_sketch.sketch,
-                    amount=body_extrude_amount,
-                    mode=Mode.SUBTRACT,
-                )
-
-        # chamfer(objects=wrench.edges(), length=1)
-        super().__init__(part=wrench.part, mode=mode)
-
-
-# blah @app.function(image=dockerfile_image)
 
 # TODO: DELETE
 XXXX = 260
@@ -250,7 +186,7 @@ bin = Bin(
         grid_y=grid_y,
         #   features=[MagnetHole(BottomCorners())]
     ),
-    height_in_units=9,
+    height_in_units=6,
     # lip=StackingLip(),
     # compartments=CompartmentsEqual(compartment_list=[Compartment()]),
 )
@@ -262,12 +198,13 @@ class Wrench(BasePartObject):
     def __init__(
         self,
         spec: WrenchSpec,
+        cut_width: float,
         mode: Mode,
     ):
         with BuildPart() as wrench:
             with BuildSketch() as full_wrench_sketch:
                 Rectangle(
-                    width=global_wrench_width,
+                    width=cut_width,
                     height=spec.total_slot_length(),
                     align=(Align.MIN, Align.CENTER),
                 )
@@ -278,11 +215,11 @@ class Wrench(BasePartObject):
 
             with BuildSketch() as body_sides_sketch:
                 Rectangle(
-                    width=global_wrench_width,
+                    width=cut_width,
                     height=spec.body_length,
                     align=(Align.MIN, Align.CENTER),
                 )
-                with Locations(((global_wrench_width - spec.body_width) / 2, 0)):
+                with Locations(((cut_width - spec.body_width) / 2, 0)):
                     Rectangle(
                         width=spec.body_width,
                         height=spec.body_length,
@@ -300,7 +237,7 @@ class Wrench(BasePartObject):
             ) as body_bottom_sketch:
                 with Locations(
                     (
-                        (global_wrench_width - spec.body_width) / 2,
+                        (cut_width - spec.body_width) / 2,
                         0,
                     )
                 ):
@@ -316,12 +253,64 @@ class Wrench(BasePartObject):
             )
 
         # chamfer(objects=wrench.edges(), length=1)
-        super().__init__(part=wrench.part, mode=mode)
+        super().__init__(part=wrench.part, mode=mode)  # type: ignore
 
 
-# def make_wrench_group(bin: Part, group_idx: int, wrenches: list[WrenchSpec]):
-# with BuildPart() as part:
-#     add(bin)
+class WrenchGroup:
+    wrenches: list[WrenchSpec]
+    placement: WrenchPlacement
+
+    def __init__(self, wrenches: list[WrenchSpec]):
+        self.wrenches = wrenches
+        self.placement = WrenchPlacement(
+            wrenches,
+            bin_width_units=grid_x,
+            bin_height_units=grid_y,
+        )
+
+    def wrench_slots(self):
+        with BuildPart() as part:
+            for wrench_idx, wrench in enumerate(self.wrenches):
+                with Locations(
+                    (
+                        self.placement.x_start_pos(idx=wrench_idx),
+                        self.placement.y_start_pos(idx=wrench_idx),
+                    )
+                ) as location:
+                    print(f"processing wrench {wrench_idx+1}")
+                    Wrench(
+                        spec=wrench,
+                        mode=Mode.ADD,
+                        cut_width=self.placement.wrench_width(),
+                    )
+        return part
+
+    def labels(self):
+        with BuildPart() as part:
+            with BuildSketch() as labels:
+                for wrench_idx, wrench in enumerate(self.wrenches):
+                    print(f"adding text for wrench {wrench_idx+1}")
+                    with Locations(
+                        (
+                            self.placement.x_start_pos(idx=wrench_idx)
+                            + (self.placement.wrench_width() / 2),
+                            self.placement.y_start_pos(idx=wrench_idx)
+                            - ((wrench.total_slot_length() + wrench_y_min_gap) / 2),
+                            top_face.center_location.position.Z,
+                        )
+                    ):
+                        Text(
+                            txt=wrench.label,
+                            font_size=10,
+                            font_path="./fonts/D-DINCondensed-Bold.otf",
+                            font_style=FontStyle.BOLD,
+                            rotation=90,
+                        )
+            extrude(to_extrude=labels.sketch, amount=3, mode=Mode.ADD)
+        return part
+
+
+# %%
 
 with BuildPart() as part:
     add(bin)
@@ -332,56 +321,67 @@ with BuildPart() as part:
         bin.faces().sort_by(Axis.Z)[-1]
     )
     with Locations(top_face):
-        for group_idx, wrench_group in enumerate(wrenches):
-            wrench_placement = WrenchPlacement(
-                wrenches=wrench_group, bin_width_units=grid_x, bin_height_units=grid_y
-            )
-            for wrench_idx, wrench in enumerate(wrench_group):
-                with Locations(
-                    (
-                        wrench_placement.x_start_pos(idx=wrench_idx),
-                        wrench_placement.y_start_pos(idx=wrench_idx),
-                    )
-                ) as location:
-                    print(f"processing wrench {wrench_idx+1}")
-                    Wrench(spec=wrench, mode=Mode.SUBTRACT)
-                with BuildSketch(
-                    Location(
-                        (
-                            wrench_placement.x_start_pos(idx=wrench_idx)
-                            + (global_wrench_width / 2),
-                            wrench_placement.y_start_pos(idx=wrench_idx)
-                            - (
-                                (
-                                    wrench.total_slot_length()
-                                    + wrench_placement.wrench_x_padding()
-                                )
-                                / 2
-                            )
-                            - 5,
-                            top_face.center_location.position.Z,
-                        )
-                    )
-                ) as label_sketch:
-                    Text(
-                        txt=wrench.label,
-                        font_size=10,
-                        font_path="./fonts/D-DINCondensed-Bold.otf",
-                        font_style=FontStyle.BOLD,
-                    )
-                    # .rotate(0, 0, 90)
-                extrude(to_extrude=label_sketch.sketch, amount=3, mode=Mode.ADD)
-
-    chamfer(
-        objects=part.faces()
-        .filter_by(GeomType.PLANE)
-        .filter_by_position(Axis.Z, 10, 1000)
-        .edges(),
-        length=1,
-    )
+        for wrench_group in wrenches:
+            group = WrenchGroup(wrench_group)
+            add(group.wrench_slots(), mode=Mode.SUBTRACT)
+            add(group.labels(), mode=Mode.ADD)
 
 show_all()
 # %%
-show(part)
+show_all()
+
+# %%
+
+# with BuildPart() as part_with_chamfers:
+#     add(part_with_wrenches_cut_out)
+#     print("adding chamfers")
+#     print(f"num faces: {len(part_with_wrenches_cut_out.faces())}")
+#     to_chamfer: set[Edge] = set()
+#     num_faces_to_chamfer = 0
+#     deepest_wrench = max(
+#         [
+#             max(
+#                 [
+#                     # TODO: this is head extrusion depth from above. should pull
+#                     # out into a helper
+#                     (1 - wrench_above_top_ratio) * wrench.head_width
+#                     for wrench in wrench_group
+#                 ]
+#             )
+#             for wrench_group in wrenches
+#         ]
+#     )
+#     for face in part_with_wrenches_cut_out.faces():
+#         if (
+#             face.center_location.position.Z
+#             >= top_face.center_location.position.Z - deepest_wrench + 1
+#         ):
+#             num_faces_to_chamfer += 1
+#             for edge in face.edges():
+#                 to_chamfer.add(edge)
+#     print(f"num faces to chamfer: {num_faces_to_chamfer}")
+#     fillet(
+#         objects=list(to_chamfer),
+#         radius=1,
+#     )
+
+# %%
+
+# with BuildPart() as part:
+#     add(part_with_wrenches_cut_out)
+#     top_face = (
+#         ### 3530 seconds (~60min) when find was:
+#         # part.faces().filter_by(GeomType.PLANE).filter_by_position(Axis.Z, 10,
+#         # 1000)
+#         bin.faces().sort_by(Axis.Z)[-1]
+#     )
+#     with Locations(top_face):
+#         for group_idx, wrench_group in enumerate(wrenches):
+#             WrenchGroup(wrench_group, mode=Mode.PRIVATE).text()
+
+
+# show_all()
+# %%
+export_stl(part.part, "out.stl")
 
 # %%
