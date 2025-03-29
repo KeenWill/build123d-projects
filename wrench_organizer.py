@@ -15,12 +15,12 @@ dockerfile_image = modal.Image.from_dockerfile("Dockerfile")
 # %%
 
 
-wrench_above_top_ratio = 0.33
+wrench_above_top_ratio = 0.5
 
 # wrench_x_min_padding = 0
-min_x_center_to_center_spacing = 20
-wrench_y_min_gap = 30
-wrench_x_margin = 15
+min_x_center_to_center_spacing = 24
+wrench_y_min_gap = 35
+wrench_x_margin = 10
 
 
 @dataclass
@@ -33,6 +33,9 @@ class WrenchSpec:
 
     def total_slot_length(self) -> float:
         return self.total_length + 10
+
+    def extrusion_depth(self) -> float:
+        return (1 - wrench_above_top_ratio) * self.head_width
 
 
 def bin_width_units(num_wrenches: int):
@@ -76,79 +79,88 @@ class WrenchPlacement:
         )
 
 
-# TODO: DELETE
-XXXX = 260
-
 imperial: list[WrenchSpec] = [
-    WrenchSpec('1/4"', total_length=132, body_length=95, head_width=15, body_width=3.5),
+    WrenchSpec('1/4"', total_length=132, body_length=95, head_width=17, body_width=4.0),
     WrenchSpec(
-        '5/16"', total_length=150, body_length=105, head_width=19, body_width=4.0
+        '5/16"', total_length=150, body_length=105, head_width=21, body_width=4.5
     ),
     WrenchSpec(
-        '11/32"', total_length=162, body_length=115, head_width=19, body_width=4.0
+        '11/32"', total_length=162, body_length=115, head_width=21, body_width=5.0
     ),
     WrenchSpec(
-        '3/8"', total_length=170, body_length=125, head_width=21, body_width=4.0
-    ),
-    WrenchSpec('7/16"', total_length=186, body_length=135, head_width=25, body_width=5),
-    WrenchSpec(
-        '1/2"', total_length=208, body_length=150, head_width=28, body_width=5.5
+        '3/8"', total_length=170, body_length=125, head_width=23, body_width=5.0
     ),
     WrenchSpec(
-        '9/16"', total_length=226, body_length=165, head_width=31, body_width=5.5
-    ),
-    WrenchSpec('5/8"', total_length=244, body_length=175, head_width=36, body_width=6),
-    WrenchSpec(
-        '11/16"', total_length=263, body_length=190, head_width=38, body_width=6
-    ),
-    WrenchSpec('3/4"', total_length=280, body_length=195, head_width=42, body_width=7),
-    WrenchSpec(
-        '13/16"', total_length=302, body_length=210, head_width=46, body_width=7
+        '7/16"', total_length=186, body_length=135, head_width=27, body_width=5.5
     ),
     WrenchSpec(
-        '7/8"', total_length=XXXX, body_length=225, head_width=48, body_width=7.5
+        '1/2"', total_length=208, body_length=150, head_width=30, body_width=6.0
     ),
     WrenchSpec(
-        '15/16"', total_length=XXXX, body_length=235, head_width=52, body_width=8
+        '9/16"', total_length=226, body_length=165, head_width=33, body_width=6.8
     ),
-    WrenchSpec('1"', total_length=XXXX, body_length=250, head_width=55, body_width=9),
+    WrenchSpec(
+        '5/8"', total_length=244, body_length=175, head_width=38, body_width=6.5
+    ),
+    WrenchSpec(
+        '11/16"', total_length=263, body_length=190, head_width=40, body_width=6.5
+    ),
+    WrenchSpec(
+        '3/4"', total_length=280, body_length=195, head_width=44, body_width=7.5
+    ),
+    WrenchSpec(
+        '13/16"', total_length=302, body_length=210, head_width=50, body_width=7.5
+    ),
+    WrenchSpec(
+        '7/8"', total_length=320, body_length=215, head_width=52, body_width=7.5
+    ),
+    WrenchSpec(
+        '15/16"', total_length=337, body_length=235, head_width=56, body_width=8
+    ),
+    WrenchSpec('1"', total_length=356, body_length=250, head_width=58, body_width=9),
 ]
 metric: list[WrenchSpec] = [
     ###################################
     ####### METRIC
     ###################################
-    WrenchSpec("6MM", total_length=132, body_length=95, head_width=15, body_width=3.5),
-    WrenchSpec("7MM", total_length=136, body_length=100, head_width=17, body_width=4),
-    WrenchSpec("8MM", total_length=150, body_length=110, head_width=18.5, body_width=4),
-    WrenchSpec("9MM", total_length=160, body_length=120, head_width=19, body_width=4),
+    WrenchSpec("6MM", total_length=132, body_length=95, head_width=17, body_width=4),
+    WrenchSpec("7MM", total_length=136, body_length=100, head_width=19, body_width=4.5),
+    WrenchSpec("8MM", total_length=150, body_length=110, head_width=21, body_width=4.5),
+    WrenchSpec("9MM", total_length=160, body_length=120, head_width=23, body_width=5.0),
     WrenchSpec(
-        "10MM", total_length=175, body_length=125, head_width=22, body_width=4.5
-    ),
-    WrenchSpec("11MM", total_length=188, body_length=132, head_width=25, body_width=5),
-    WrenchSpec("12MM", total_length=198, body_length=140, head_width=27, body_width=5),
-    WrenchSpec("13MM", total_length=210, body_length=150, head_width=28, body_width=5),
-    WrenchSpec(
-        "14MM", total_length=225, body_length=160, head_width=31, body_width=5.5
+        "10MM", total_length=175, body_length=125, head_width=24, body_width=5.0
     ),
     WrenchSpec(
-        "15MM", total_length=235, body_length=165, head_width=33, body_width=5.5
+        "11MM", total_length=188, body_length=132, head_width=26, body_width=5.5
     ),
     WrenchSpec(
-        "16MM", total_length=245, body_length=170, head_width=35, body_width=5.5
-    ),
-    WrenchSpec("17MM", total_length=265, body_length=175, head_width=35, body_width=6),
-    WrenchSpec(
-        "18MM", total_length=273, body_length=190, head_width=40, body_width=6.5
+        "12MM", total_length=198, body_length=140, head_width=28, body_width=5.5
     ),
     WrenchSpec(
-        "19MM", total_length=281, body_length=195, head_width=42, body_width=6.5
+        "13MM", total_length=210, body_length=150, head_width=30, body_width=5.5
+    ),
+    WrenchSpec(
+        "14MM", total_length=225, body_length=160, head_width=33, body_width=6.0
+    ),
+    WrenchSpec(
+        "15MM", total_length=235, body_length=165, head_width=35, body_width=6.0
+    ),
+    WrenchSpec(
+        "16MM", total_length=245, body_length=170, head_width=38, body_width=6.0
+    ),
+    WrenchSpec("17MM", total_length=265, body_length=182, head_width=40, body_width=6),
+    WrenchSpec(
+        "18MM", total_length=273, body_length=190, head_width=43, body_width=6.5
+    ),
+    WrenchSpec(
+        "19MM", total_length=281, body_length=195, head_width=46, body_width=6.5
     ),
 ]
 
 
 max_wrenches_width = 14
 grid_x = bin_width_units(num_wrenches=max_wrenches_width)
-grid_y = 13
+grid_y = 14
 
 # %%
 
@@ -180,7 +192,7 @@ class Wrench(BasePartObject):
                     height=spec.total_slot_length(),
                     align=(Align.MIN, Align.CENTER),
                 )
-            head_extrude_amount = (1 - wrench_above_top_ratio) * spec.head_width
+            head_extrude_amount = spec.extrusion_depth()
             extrude(
                 to_extrude=full_wrench_sketch.sketch, amount=-1 * head_extrude_amount
             )
@@ -281,6 +293,28 @@ class WrenchGroup:
             extrude(to_extrude=labels.sketch, amount=3, mode=Mode.ADD)
         return part
 
+    # def bridge_between_wrench_groups(self, other: Self):
+    #     # TODO: fix range
+    #     with BuildPart() as part:
+    #         num_wrenches = 14
+    #         for x_idx in range(num_wrenches):
+    #             y_idx = num_wrenches - x_idx
+    #             x = self.wrenches[x_idx]
+    #             y = other.wrenches[num_wrenches - y_idx]
+    #             depth = max(x.extrusion_depth(), y.extrusion_depth())
+    #             x_bound = x.total_slot_length() + wrench_y_min_gap
+    #             y_bound = other.placement.y_start_pos(idx=y_idx)
+    #             left_bound, right_bound = min(x_bound, y_bound), max(x_bound, y_bound)
+    #             with BuildSketch(
+    #                 Location((self.placement.x_start_pos(idx=x_idx), left_bound))
+    #             ):
+    #                 Rectangle(
+    #                     width=self.placement.wrench_width(),
+    #                     height=right_bound - left_bound,
+    #                 )
+    #             extrude(amount=-depth)
+    #     return part
+
 
 # %%
 
@@ -302,9 +336,14 @@ with BuildPart() as part:
         add(imperial_group.wrench_slots(), mode=Mode.SUBTRACT, rotation=(0, 0, 180))
         add(imperial_group.labels(flip=True), mode=Mode.ADD, rotation=(0, 0, 180))
 
+        # add(
+        #     metric_group.bridge_between_wrench_groups(other=imperial_group),
+        #     mode=Mode.SUBTRACT,
+        # )
+
 show_all()
 # %%
-show_all()
+export_stl(part.part, "out.stl")  # type: ignore
 
 # %%
 
@@ -320,7 +359,7 @@ show_all()
 #                 [
 #                     # TODO: this is head extrusion depth from above. should pull
 #                     # out into a helper
-#                     (1 - wrench_above_top_ratio) * wrench.head_width
+#                     wrench.extrustion_depth()
 #                     for wrench in wrench_group
 #                 ]
 #             )
