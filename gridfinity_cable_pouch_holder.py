@@ -10,8 +10,12 @@ from dataclasses import dataclass
 # %%
 
 bin = Bin(
-    BaseEqual(grid_x=3, grid_y=2, features=[MagnetHole(BottomCorners())]),
-    height_in_units=18,
+    BaseEqual(
+        grid_x=4,
+        grid_y=2,
+        #   features=[MagnetHole(BottomCorners())]
+    ),
+    height_in_units=6,
     lip=StackingLip(),
     compartments=CompartmentsEqual(compartment_list=[Compartment()]),
 )

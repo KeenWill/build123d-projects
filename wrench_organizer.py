@@ -347,6 +347,7 @@ export_stl(part.part, "out.stl")  # type: ignore
 
 # %%
 
+
 # with BuildPart() as part_with_chamfers:
 #     add(part_with_wrenches_cut_out)
 #     print("adding chamfers")
