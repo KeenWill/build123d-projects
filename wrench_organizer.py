@@ -341,9 +341,11 @@ with BuildPart() as part:
         #     mode=Mode.SUBTRACT,
         # )
 
-show_all()
+# show_all()
 # %%
-export_stl(part.part, "out.stl")  # type: ignore
+# export_stl(part.part, "out.stl")  # type: ignore
+export_stl(part.part, "wrench_organizer.stl")
+export_step(part.part, "wrench_organizer.step")
 
 # %%
 
@@ -398,6 +400,5 @@ export_stl(part.part, "out.stl")  # type: ignore
 
 # show_all()
 # %%
-export_stl(part.part, "out.stl")
 
 # %%
